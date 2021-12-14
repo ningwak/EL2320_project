@@ -1,0 +1,22 @@
+The original dataset victoria_part is downloaded from http://www-personal.acfr.usyd.edu.au/nebot/victoria_park.htm.
+
+
+Informtion about processed dataset:
+
+
+control data:
+
+controlSpeed (in m/secs.)
+controlSteering (in radians.)
+controlTime (in millisecs.)
+
+
+measure data:
+
+laserData:
+	each cell corresponds to one measurement
+	first line in each cell: direction of the detected trees (in radians.)
+	second line in each cell: distance from the car to the trees (in m.)
+	third line in each cell: radius of each tree (in m.) 
+		- used to distinguish between trees
+laserTime (in millisecs.)
