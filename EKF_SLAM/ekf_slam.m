@@ -31,8 +31,9 @@ sigma_map = INF * eye(2 * N);
 
 sigma = [sigma_robot sigma_robot_map];
 for t = 1:80
-
+    [mu_bar, sigma_bar] = prediction(mu, sigma, data.timestep(t).odometry);
     % Perform the EKF prediction step
+    
 end
 
 
