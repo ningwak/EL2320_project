@@ -1,4 +1,4 @@
-function [ G ]= jacobian_calculation(x,u)
+function [ G ]= jacobian_calculation(x, u, T)
     global vehicle
     a = vehicle.a;
     b = vehicle.b;
@@ -6,7 +6,6 @@ function [ G ]= jacobian_calculation(x,u)
     
     v = u(1);    % speed
     alpha = u(2); % steering angle
-    T = u(3); % moving time
     theta = x(3); % heading angle
     
     G = [1 0 -T*v*(sin(theta) + 1/L*tan(alpha)*(a*cos(theta) - b*sin(theta))); 

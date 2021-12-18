@@ -16,7 +16,7 @@ function [mu_bar, sigma_bar] = prediction(mu, sigma, u)
     
     v = u(1);    % speed
     alpha = u(2); % steering angle
-    delta_t = u(3); % moving time
+    delta_t = 0.025; % moving time
     
     x = mu(1);
     y = mu(2);
@@ -29,7 +29,8 @@ function [mu_bar, sigma_bar] = prediction(mu, sigma, u)
     mu_bar = mu + delta_t * F' * [v*(cos(theta) - 1/L*tan(alpha)*m1); 
                              v*(sin(theta) + 1/L*tan(alpha)*m2);
                              v/L*tan(alpha)];
-    Gx = jacobian_calculation(mu ,u);
+    Gx = jacobian_calculation(mu ,u, delta_t);
     G = eye(size(sigma, 1)) + F' * (Gx - eye(3)) * F;
     sigma_bar = G * sigma * G' + F' * noise.R * F;
+    mu_bar(3) = mod(mu_bar(3), 2 * pi);
 end
