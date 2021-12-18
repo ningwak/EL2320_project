@@ -1,8 +1,6 @@
-function [omega,xi] = linearize(z,x0,u,m,t)
+function [omega,xi] = linearize(z,x0,u,m,t,R,Q)
 
-global noise
-R = noise.R;
-Q = noise.Q;
+
 
 dt=0.025;
 a=3.78;
@@ -15,10 +13,15 @@ dim_num = t+size(m,2);%t:number of motion states,m:number of landmarks
 omega=zeros(3*dim_num, 3*dim_num);
 xi=zeros(3*dim_num, 1);
 
+%sparse the matrix
+omega=sparse(omega);
+xi=sparse(xi);
+
 omega_start=eye(3)*(10^10); %set an infinite start information matrix
 omega(1:3, 1:3)=omega_start;
 
-for i=1:t-1 %for all controls
+%for all controls
+for i=1:t-1 
     
     v = u(1, i);
     steer = u(2, i); %steering angle
@@ -33,12 +36,15 @@ for i=1:t-1 %for all controls
     %index2 = (3*i+1):3*(i+1);
     index=(3*(i-1)+1):3*(i+1);
     omega(index,index)=omega(index,index)+[inv(R),- R \ G;(- R \ G)',G' / R * G]; %??? maybe should adeverse
+    
+    %omega(index,index)=omega(index,index)+[G' / R * G, -G'*inv(R);-inv(R)*G, inv(R)];
 
 end
 
+
 for j=1:size(z,2)
-    jj=obj.z.c(j);; % false
-    t=obj.z.idx(j); % false
+    jj=z(5,j); % correspondence
+    t=z(4,j); % time index
 
     delta=[m(1,jj)-x0(1,t);m(2,jj)-x0(2,t)];
     q=delta'*delta;
@@ -61,8 +67,10 @@ for j=1:size(z,2)
     %add to information vector xi
     xi_1= H_1' / Q * (m(:,j) - z_hat + [H_1, H_2]*[x0(:,t); m(:,jj)]); %here is a little different with hu
     xi_2= H_2' / Q * (m(:,j) - z_hat + [H_1, H_2]*[x0(:,t); m(:,jj)]); %here is a little different with hu
-    xi(t_idx) = xi(index_1) + xi_1;
-    xi(j_idx) = xi(index_2) + xi_2;
+    xi(index_1) = xi(index_1) + xi_1;
+    xi(index_2) = xi(index_2) + xi_2;
 end
+
+fprintf("linearize successfully\n");
 
 end
