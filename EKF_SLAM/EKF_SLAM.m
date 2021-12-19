@@ -12,14 +12,14 @@ x0 = [-67.6493; -41.7142; 35.5*pi/180]; % initial estimated state 3 * t [x; y; p
 INF = 1000;
 
 noise.R = diag([0.05 0.05 0.001]); % (x, y, th)  [0.05 0.05 0.001]
-noise.Q = diag([10000 1 10]);   % (range, angle, signature)     [1 0.01]
+noise.Q = diag([1000 600 1]);   % (range, angle, signature)     [1 0.01]
 
 % variables
-t = 2000; % overall time, maximum 61945
+t = 1800; % overall time, maximum 61945
 alpha = 1; % Minimum PI value
 u = zeros(2, t - 1); % control signal 2 * (t-1) [speed; steering angle]
 z = []; % measurement 5 * unknown
-        % [direction; distance; radius of tree; time index; correspondence]
+        % [distance; direction; radius of tree; time index; correspondence]
 x = zeros(3, t); % estimated state 3 * t [x; y; phi]
 m = []; % landmarks 3 * unknown [x; y; r]
 mObs = []; % time moments that each landmark is observed 
@@ -41,8 +41,8 @@ for i = 1: t - 1
     if size(zt, 2) > 0
         for noi = 1:size(zt, 2)
             flag = 0; % Whether to append a landmark
-            tree_x = mu_bar(1) + zt(2, noi) * cos(zt(1, noi) + mu_bar(3));
-            tree_y = mu_bar(2) + zt(2, noi) * sin(zt(1, noi) + mu_bar(3));
+            tree_x = mu_bar(1) + zt(1, noi) * cos(zt(2, noi) + mu_bar(3));
+            tree_y = mu_bar(2) + zt(1, noi) * sin(zt(2, noi) + mu_bar(3));
             tree_r = zt(3, noi);
             H = cell(N_t + 1);
             PSI = cell(N_t + 1);
@@ -54,12 +54,17 @@ for i = 1: t - 1
                     mu_xy(3 * lmi + 2) = mu_bar(2) + mu_bar(3 * lmi + 1) * sin(mu_bar(3) + mu_bar(3 * lmi + 2));
                     mu_xy(3 * lmi + 3) = mu_bar(3 * lmi + 3); 
                 end
-                PI = zeros(N_t + 1, 1);
+%                 PI = zeros(N_t + 1, 1);
+                PI = zeros(N_t, 1);
                 for k = 1:N_t
-                    delta = [mu_xy(3 * k + 1) - mu_bar(1); mu_xy(3 * k + 2) - mu_bar(2)];
+                    delta = [mu_xy(3 * k + 1) - mu_bar(1);
+                        mu_xy(3 * k + 2) - mu_bar(2)];
                     q = delta' * delta;
-                    zhat{k} = [sqrt(q); atan2(delta(2), delta(1)); mu_xy(3 * k + 3)];
-                    F = [eye(3) zeros(3, 3 * N_t); zeros(3, 3 * k) eye(3) zeros(3, 3 * (N_t - k))];
+                    zhat{k} = [sqrt(q);
+                        atan2(delta(2), delta(1)) - mu_bar(3);
+                        mu_xy(3 * k + 3)];
+                    F = [eye(3) zeros(3, 3 * N_t);
+                        zeros(3, 3 * k) eye(3) zeros(3, 3 * (N_t - k))];
                     H_matrix = [-sqrt(q) * delta(1) -sqrt(q) * delta(2) 0 sqrt(q) * delta(1) sqrt(q) * delta(2) 0;
                                 delta(2) -delta(1) -1 -delta(2) delta(1) 0;
                                 0 0 0 0 0 1];
@@ -67,19 +72,30 @@ for i = 1: t - 1
                     PSI{k} = H{k} * sigma_bar * H{k}' + noise.Q;
                     PI(k) = (zt(1:3, noi) - zhat{k})' * inv(PSI{k}) * (zt(1:3, noi) - zhat{k});
                 end
-                PI(N_t + 1) = alpha;
-                [~, j] = min(PI);
-                if j > N_t
-                    flag = 1;
-                end                
+%                 PI(N_t + 1) = alpha;
+%                 if N_t > 1
+%                     [~, j2] = mink(PI, 2);
+%                     j = j2(1);
+%                     if PI(j) > alpha || PI(j2(2)) < 1.1 * PI(j)
+%                         flag = 1;
+%                     end
+%                 else
+                    [~, j] = min(PI);
+                    if PI(j) > alpha
+                        flag = 1;
+                    end
+%                 end
+%                 if PI(j) > alpha
+%                     flag = 1;
+%                 end                
             else
-                j = N_t + 1;
                 flag = 1;
             end
             if flag == 1
                 % Increase the dimension
                 mu_bar = [mu_bar; zt(1:3, noi)];
-                sigma_bar = blkdiag(sigma_bar, noise.Q);
+                sigma_bar = blkdiag(sigma_bar, zeros(3));
+%                 sigma_bar = eye(3 + 3 * N_t) - self.K.dot(self.H) * sigma_bar;
 
 %                 delta = [tree_x - mu_bar(1); tree_y - mu_bar(2)];
 %                 q = delta' * delta;
@@ -105,6 +121,7 @@ for i = 1: t - 1
 %     mu_bar(1:3)
 %     x0(3, i + 1)
 %     i
+    mu_bar(3) = mod(mu_bar(3), 2 * pi);
     mu = mu_bar;
     x(:, i + 1) = mu(1:3);
     sigma = sigma_bar;
@@ -112,7 +129,7 @@ end
 plot(x(1, :), x(2, :), "Color", 'r');
 hold on;
 for i = 1:N_t - 1
-    plot(mu_xy(3 * i + 1), mu_xy(3 * i + 2), 'b.','MarkerSize', 4);
+    plot(mu_xy(3 * i + 1), mu_xy(3 * i + 2), 'b.','MarkerSize', 10);
     hold on;
 end
 plot(x0(1, :), x0(2, :), "Color", 'g');
