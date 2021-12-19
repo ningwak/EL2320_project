@@ -1,9 +1,8 @@
-function [x,m,cov] = solve(omega_hat,xi_hat,omega,xi,tao,x,m)
+function [x,map,cov] = solve(omega_hat,xi_hat,omega,xi,tau,x,m)
 
 cov=inv(omega_hat);
 x=cov*xi_hat;
 map=zeros(3*size(m,2),1);
-tau=tao;
 
 %for each feature do
 for i=1:size(m,2)

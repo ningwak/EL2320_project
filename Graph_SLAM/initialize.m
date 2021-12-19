@@ -1,4 +1,4 @@
-function [u, z, x, m, tao] = initialize(controlSpeed, controlSteering, controlTime, laserData, laserTime, t, u, z, x, m, tao)
+function [u, z, x, m, tau] = initialize(controlSpeed, controlSteering, controlTime, laserData, laserTime, t, u, z, x, m, tau)
     
     a = 3.78;
     b = 0.5;
@@ -34,7 +34,7 @@ function [u, z, x, m, tao] = initialize(controlSpeed, controlSteering, controlTi
                 mt(3, :) = zt(3, :);
                 m = [m mt];
                 for j = 1:num
-                    tao{landmarkPtr + j} = i;
+                    tau{landmarkPtr + j} = i;
                 end
                 landmarkPtr = landmarkPtr + num;
                 laserPtr = laserPtr + 1;

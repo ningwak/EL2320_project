@@ -15,7 +15,7 @@ xi=zeros(3*dim_num, 1);
 omega=sparse(omega);
 xi=sparse(xi);
 
-omega_start=eye(3)*(10^10); %set an infinite start information matrix
+omega_start=eye(3)*(10^8); %set an infinite start information matrix
 omega(1:3, 1:3)=omega_start;
 
 %for all controls

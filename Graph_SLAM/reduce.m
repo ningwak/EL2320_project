@@ -1,8 +1,7 @@
-function [omega_hat,xi_hat] = reduce(omega,xi,m,tao,x)%not sure if tao is the set of all poses xt at which j was observed
+function [omega_hat,xi_hat] = reduce(omega,xi,m,tau,x)%not sure if tao is the set of all poses xt at which j was observed
 
 omega_hat=omega;
 xi_hat=xi;
-tau=tao;
 
 %for each feature do
 for i=1:size(m,2)

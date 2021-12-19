@@ -7,7 +7,7 @@ z = []; % measurement 5 * unknown
         % [direction; distance; radius of tree; time index; correspondence]
 x = zeros(3, t); % estimated state of car 3 * t [x; y; phi]
 m = []; % landmarks 3 * unknown [x; y; r]
-tao = []; % time moments that each landmark is observed 
+tau = []; % time moments that each landmark is observed 
 
 %define noise
 R = diag([0.05 0.05 0.001]); % (x, y, th)  [0.05 0.05 0.001]
@@ -15,16 +15,15 @@ Q = diag([1 0.01 1]);   % (range, angle, signature)     [1 0.01]
 
 % initialize
 x(:, 1) = [0; 0; 0];
-[u, z, x, m, tao] = initialize(controlSpeed, controlSteering, controlTime, ...
-                                 laserData, laserTime, t, u, z, x, m, tao);
+[u, z, x, m, tau] = initialize(controlSpeed, controlSteering, controlTime, ...
+                                 laserData, laserTime, t, u, z, x, m, tau);
 [omega, xi] = linearize(z, x, u, m, t, R, Q);
-[omega_hat, xi_hat] = reduce(omega, xi, m, tao, x);
-[x, m, cov] = solve(omega_hat, xi_hat, omega, xi, tao, x, m);
+[omega_hat, xi_hat] = reduce(omega, xi, m, tau, x);
+[x, m, cov] = solve(omega_hat, xi_hat, omega, xi, tau, x, m);
 
 for i = 1:5
-    [z, m, tao] = check_correspondence(z, x, m, tao, omega, cov, Q);
+    [z, m, tau] = check_correspondence(z, x, m, tau, omega, cov, Q);
     [omega,xi] = linearize(z,x,u,m,t,R,Q);
-    [omega_hat,xi_hat] = reduce(omega,xi,m,tao,x);
-    
-    [x,m,cov] = solve(omega_hat,xi_hat,omega,xi,tao,x,m);
+    [omega_hat,xi_hat] = reduce(omega,xi,m,tau,x);
+    [x,m,cov] = solve(omega_hat,xi_hat,omega,xi,tau,x,m);
 end

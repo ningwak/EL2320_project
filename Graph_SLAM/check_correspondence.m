@@ -1,4 +1,4 @@
-function [z, mNew, taoNew] = check_correspondence(z, x, m, tao, omega, cov, Q)
+function [z, mNew, taoNew] = check_correspondence(z, x, m, tau, omega, cov, Q)
     
     % check correspondence for non-corresponding features
     landmarkNum = size(m, 2);
@@ -6,10 +6,9 @@ function [z, mNew, taoNew] = check_correspondence(z, x, m, tao, omega, cov, Q)
     % 0 means only detected once, k means it is the same landmark as other landmark with grouping value k
     groupingNum = 0;
     % number of groups of corresponding features
-    landmarkNumNew = landmarkNum;
     for j = 1 : landmarkNum - 1
         for k = (j + 1) : landmarkNum
-            probability = correspondence_test(x, m, tao, omega, cov, j, k, Q);
+            probability = correspondence_test(x, m, tau, omega, cov, j, k, Q);
             if (probability > 1)
                 %z(z(5, :) == k) = j;
                 if (grouping(j) == 0)
@@ -17,11 +16,12 @@ function [z, mNew, taoNew] = check_correspondence(z, x, m, tao, omega, cov, Q)
                     grouping(j) = groupingNum;
                 end
                 grouping(k) = grouping(j);
-                landmarkNumNew = landmarkNumNew - 1;
             end
         end
     end
+    
     % update map
+    landmarkNumNew = landmarkNum - sum(grouping ~= 0) + groupingNum;
     mapping = zeros(1, landmarkNum); 
     % mapping(j) indicates which new landmark corresponds to the old landmark k
     mNew = zeros(3, landmarkNumNew);
@@ -30,25 +30,27 @@ function [z, mNew, taoNew] = check_correspondence(z, x, m, tao, omega, cov, Q)
         if (grouping(i) == 0)
             mNew(:, mPtr) = m(:, i);
             mapping(i) = mPtr;
+            mPtr = mPtr + 1;
         elseif (grouping(i) ~= -1)
             mNew(:, mPtr) = [mean(m(1, grouping == grouping(i))); ...
                 mean(m(2, grouping == grouping(i))); mean(m(3, grouping == grouping(i)))];
             mapping(grouping == grouping(i)) = mPtr;
             grouping(grouping == grouping(i)) = -1;
+            mPtr = mPtr + 1;
         end
-        mPtr = mPtr + 1;
     end
     
-    % update tao
+    % update tau
     taoNew = cell(1, landmarkNumNew);
     for i = 1 : landmarkNumNew
-        taoNew{i} = union(tao{mapping == i});
+        taoNew{i} = horzcat(tau{mapping == i});
     end
     
     % update correspondence
     for i = 1 : size(z, 2)
         z(5, i) = mapping(z(5, i));
     end
+    
     
     fprintf("check correspondence successfully\n");
 end
