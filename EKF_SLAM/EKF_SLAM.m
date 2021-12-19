@@ -2,6 +2,11 @@ clear;
 clc;
 load('dataVictoriaPark.mat');
 
+load aa3_gpsx ; 
+% plot(Lo_m(1:275),La_m(1:275),'.') ;
+plot(Lo_m(1:151),La_m(1:151),'.') ;
+hold on;
+
 global vehicle x0 noise N_t INF
 vehicle.L = 2.83;
 vehicle.a = 0.95;
@@ -9,14 +14,16 @@ vehicle.b = 0.5;
 vehicle.H = 0.76;
 N_t = 0;
 x0 = [-67.6493; -41.7142; 35.5*pi/180]; % initial estimated state 3 * t [x; y; phi]
-INF = 1000;
+INF = 500;
 
+% noise.R = diag([0.05 0.05 0.001]); % (x, y, th)  [0.05 0.05 0.001]
 noise.R = diag([0.05 0.05 0.001]); % (x, y, th)  [0.05 0.05 0.001]
-noise.Q = diag([1000 600 1]);   % (range, angle, signature)     [1 0.01]
+noise.Q = diag([1000 700 1]);   % (range, angle, signature)     [1 0.01]
 
 % variables
-t = 1800; % overall time, maximum 61945
-alpha = 1; % Minimum PI value
+t = 1300; % overall time, maximum 61945
+
+alpha = 0.15; % Minimum PI value
 u = zeros(2, t - 1); % control signal 2 * (t-1) [speed; steering angle]
 z = []; % measurement 5 * unknown
         % [distance; direction; radius of tree; time index; correspondence]
@@ -25,7 +32,7 @@ m = []; % landmarks 3 * unknown [x; y; r]
 mObs = []; % time moments that each landmark is observed 
 omega = []; % information matrix
 xi = []; % information vector
-sigma = zeros(3);
+sigma = 1e-6 * eye(3);
 
 % initialize
 [u, z, x0, m, mObs] = initialize(controlSpeed, controlSteering, controlTime, ...
@@ -94,7 +101,7 @@ for i = 1: t - 1
             if flag == 1
                 % Increase the dimension
                 mu_bar = [mu_bar; zt(1:3, noi)];
-                sigma_bar = blkdiag(sigma_bar, zeros(3));
+                sigma_bar = blkdiag(sigma_bar, INF * eye(3));
 %                 sigma_bar = eye(3 + 3 * N_t) - self.K.dot(self.H) * sigma_bar;
 
 %                 delta = [tree_x - mu_bar(1); tree_y - mu_bar(2)];
@@ -120,7 +127,7 @@ for i = 1: t - 1
     end
 %     mu_bar(1:3)
 %     x0(3, i + 1)
-%     i
+    i
     mu_bar(3) = mod(mu_bar(3), 2 * pi);
     mu = mu_bar;
     x(:, i + 1) = mu(1:3);
@@ -133,4 +140,7 @@ for i = 1:N_t - 1
     hold on;
 end
 plot(x0(1, :), x0(2, :), "Color", 'g');
+
+
+
 
