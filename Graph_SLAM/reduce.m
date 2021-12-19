@@ -6,8 +6,8 @@ tau=mObs;
 
 %for each feature do
 for i=1:size(m,2)
-    index_j = (3*(i-1)+1+3*size(x,2)):(3*i+3*size(x,2));
-    index_tauj=(3*(tau{i}-1)+1):(3*tau{i});
+    index_j = (3*i-2+3*size(x,2)):(3*i+3*size(x,2));
+    index_tauj=findInformation(x, tau{i}, "car");%(3*tau{i}-2):(3*tau{i});
 
     %subtract```` from xi
     xi_hat(index_tauj) = xi_hat(index_tauj)- omega_hat(index_tauj,index_j)/omega_hat(index_j,index_j)*xi_hat(index_j);
