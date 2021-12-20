@@ -27,3 +27,6 @@ for i = 1:5
     [omega_hat,xi_hat] = reduce(omega,xi,m,tau,x);
     [x,m,cov] = solve(omega_hat,xi_hat,omega,xi,tau,x,m);
 end
+
+%plot graph
+Plot(x,m,110);%110 is the value of t_gps. you can change the value between 1 and 4466
