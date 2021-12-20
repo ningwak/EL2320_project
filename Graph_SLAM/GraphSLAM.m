@@ -19,7 +19,15 @@ x(:, 1) = [0; 0; 0];
                                  laserData, laserTime, t, u, z, x, m, tau);
 [omega, xi] = linearize(z, x, u, m, t, R, Q);
 [omega_hat, xi_hat] = reduce(omega, xi, m, tau, x);
+
+omega_full=full(omega);
+xi_full=full(xi);
+
+omega_hat_full=full(omega_hat);
+xi_hat_full=full(xi_hat);
+
 [x, m, cov] = solve(omega_hat, xi_hat, omega, xi, tau, x, m);
+
 
 for i = 1:5
     [z, m, tau] = check_correspondence(z, x, m, tau, omega, cov, Q);
