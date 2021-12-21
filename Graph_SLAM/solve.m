@@ -1,4 +1,4 @@
-function [pose,map,cov] = solve(omega_hat,xi_hat,omega,xi,tau,x,m)
+function [mu,cov] = solve(omega_hat,xi_hat,omega,xi,tau,x,m)
 
 cov=inv(omega_hat);
 pose=cov*xi_hat;
@@ -13,8 +13,9 @@ for i=1:size(m,2)
    
 end
 
-pose = reshape(pose, 3, []);
-map = reshape(map, 3, []);
+mu = [pose; map];
+%pose = reshape(pose, 3, []);
+%map = reshape(map, 3, []);
 
 fprintf("solve successfully\n");
 

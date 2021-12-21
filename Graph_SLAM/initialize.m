@@ -4,7 +4,7 @@ function [u, z, x, m, tau] = initialize(controlSpeed, controlSteering, controlTi
     b = 0.5;
     L = 2.83;
     dt = 0.025;
-    
+
     u(1, :) = controlSpeed(1 : t - 1);
     u(2, :) = controlSteering(1 : t - 1);
     

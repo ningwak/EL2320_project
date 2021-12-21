@@ -1,4 +1,4 @@
-function [z, mNew, taoNew] = check_correspondence(z, x, m, tau, omega, cov, Q)
+function [z, mNew, taoNew] = check_correspondence(z, x, m, tau, omega, cov, Q, mu)
     
     % check correspondence for non-corresponding features
     landmarkNum = size(m, 2);
@@ -8,7 +8,7 @@ function [z, mNew, taoNew] = check_correspondence(z, x, m, tau, omega, cov, Q)
     % number of groups of corresponding features
     for j = 1 : landmarkNum - 1
         for k = (j + 1) : landmarkNum
-            probability = correspondence_test(x, m, tau, omega, cov, j, k, Q);
+            probability = correspondence_test(x, tau, omega, cov, j, k, Q, mu);
             if (probability > 1)
                 %z(z(5, :) == k) = j;
                 if (grouping(j) == 0)
@@ -17,6 +17,9 @@ function [z, mNew, taoNew] = check_correspondence(z, x, m, tau, omega, cov, Q)
                 end
                 grouping(k) = grouping(j);
             end
+        end
+        if mod(j,100) == 0
+            fprintf("Batch Association progress: %d\n", j)
         end
     end
     
