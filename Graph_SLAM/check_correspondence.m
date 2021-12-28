@@ -8,9 +8,8 @@ function [z, mNew, taoNew] = check_correspondence(z, x, m, tau, omega, cov, Q, m
     % number of groups of corresponding features
     for j = 1 : landmarkNum - 1
         for k = (j + 1) : landmarkNum
-            probability = correspondence_test(x, tau, omega, cov, j, k, Q, mu);
-            if (probability > 1)
-                %z(z(5, :) == k) = j;
+            probability = abs(correspondence_test(x, tau, omega, cov, j, k, Q, mu));
+            if (probability > 1e-400)
                 if (grouping(j) == 0)
                     groupingNum = groupingNum + 1;
                     grouping(j) = groupingNum;
@@ -35,8 +34,8 @@ function [z, mNew, taoNew] = check_correspondence(z, x, m, tau, omega, cov, Q, m
             mapping(i) = mPtr;
             mPtr = mPtr + 1;
         elseif (grouping(i) ~= -1)
-            mNew(:, mPtr) = [mean(m(1, grouping == grouping(i))); ...
-                mean(m(2, grouping == grouping(i))); mean(m(3, grouping == grouping(i)))];
+            %mNew(:, mPtr) = [mean(m(1, grouping == grouping(i))); mean(m(2, grouping == grouping(i))); mean(m(3, grouping == grouping(i)))];
+            mNew(:, mPtr) = m(:, i);
             mapping(grouping == grouping(i)) = mPtr;
             grouping(grouping == grouping(i)) = -1;
             mPtr = mPtr + 1;
@@ -53,7 +52,6 @@ function [z, mNew, taoNew] = check_correspondence(z, x, m, tau, omega, cov, Q, m
     for i = 1 : size(z, 2)
         z(5, i) = mapping(z(5, i));
     end
-    
     
     fprintf("check correspondence successfully\n");
 end
