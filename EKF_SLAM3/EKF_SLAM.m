@@ -176,7 +176,7 @@ for i = 1: t - 1
     hold on;
 end
 
-t = toc;
+time = toc;
 
 % plot error
 gps_t = 180;
