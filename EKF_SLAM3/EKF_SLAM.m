@@ -14,7 +14,7 @@ vehicle.a = 0.95;
 vehicle.b = 0.5;
 vehicle.H = 0.76;
 N_t = 0;
-x0 = [-67.7310; -41.6681; 35.5*pi/180]; % initial estimated state 3 * t [x; y; phi]
+x0 = [-67.6493; -41.7142; 35.5*pi/180]; % initial estimated state 3 * t [x; y; phi]
 %x0 = [-67.6493; -41.7142; 35.5*pi/180]; 
 
 % noise.R = diag([0.05 0.05 0.001]); % (x, y, th)  [0.05 0.05 0.001]
@@ -22,7 +22,7 @@ noise.R = diag([0.05 0.05 0.001]); % (x, y, th)  [0.05 0.05 0.001]
 noise.Q = diag([5000 3000 800]);   % (range, angle, signature)     [1 0.01]
 
 % variables
-t = 5000; % overall time, maximum 61945
+t = 200; % overall time, maximum 61945
 
 alpha = 0.03;%0.03; % Minimum PI value
 u = zeros(2, t - 1); % control signal 2 * (t-1) [speed; steering angle]
@@ -34,6 +34,8 @@ mObs = []; % time moments that each landmark is observed
 omega = []; % information matrix
 xi = []; % information vector
 sigma = 1e-12*eye(3);
+
+tic
 
 % initialize (from the graph slam implementation, just to read control signals)
 [u, z, x0, m, mObs] = initialize(controlSpeed, controlSteering, controlTime, ...
@@ -49,7 +51,7 @@ figure('name','SLAM Demo','color','w','units','normalized',...
 hold on;box on; axis equal;
 image([-142 188],[260 -120],I,'alphadata',1);  % Satelite map
 axis([-120 160 -50 240]); 
-plot(Lo_m(1:7:end,1)+67.7310,La_m(1:7:end,1)+41.6681, 'b.', 'markersize', 5);  % Ground truth
+plot(Lo_m(1:7:end,1)+67.6493,La_m(1:7:end,1)+41.7142, 'b.', 'markersize', 5);  % Ground truth
 hold on;
 set(gca,'xtick',[],'ytick',[]); 
 set(gca,'Color','w','XColor','w','YColor','w')
@@ -173,14 +175,35 @@ for i = 1: t - 1
     drawnow;
     hold on;
 end
-% plot(x(1, :), x(2, :), "Color", 'r');
-% hold on;
-% for i = 1:N_t - 1
-%     plot(mu_xy(3 * i + 1), mu_xy(3 * i + 2), 'b.','MarkerSize', 10);
-%     hold on;
-% end
-% plot(x0(1, :), x0(2, :), "Color", 'g');
 
+t = toc;
 
+% plot error
+gps_t = 180;
+pose_errors = zeros(2, gps_t);
+mu_ptr = 1;
+for i = 1:gps_t
+    if (controlTime(mu_ptr) < timeGps(i))
+        mu_ptr = mu_ptr + 1;
+        if (mu_ptr > t) 
+            gps_t = i - 1;
+            break;
+        end
+    end
+    pose_errors(1, i) = x(1, mu_ptr) - Lo_m(i);
+    pose_errors(2, i) = x(2, mu_ptr) - La_m(i);
+end
 
+timesteps = 1:gps_t;
+mex = mean(pose_errors(1, gps_t));
+mey = mean(pose_errors(2, gps_t));
 
+figure('Name', 'Evolution State Estimation Errors');
+subplot(2,1,1);
+plot(timesteps, pose_errors(1,1:gps_t));
+ylabel('error\_x [m]');
+title(sprintf('error on x, mean error = %.2fm', mex));
+subplot(2,1,2);
+plot(timesteps, pose_errors(2,1:gps_t));
+ylabel('error\_y [m]');
+title(sprintf('error on y, mean error = %.2fm', mey));
