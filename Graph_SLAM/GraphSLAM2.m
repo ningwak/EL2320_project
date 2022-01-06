@@ -99,15 +99,15 @@ gps_t = 180;
 pose_errors = zeros(2, gps_t);
 mu_ptr = 1;
 for i = 1:gps_t
-    if (controlTime(mu_ptr) < timeGps(i))
+    while controlTime(mu_ptr) < timeGps(i)
         mu_ptr = mu_ptr + 1;
-        if (mu_ptr > t) 
-            gps_t = i - 1;
-            break;
-        end
     end
-    pose_errors(1, i) = x(1, mu_ptr) - Lo_m(i) - 67.6493;
-    pose_errors(2, i) = x(2, mu_ptr) - La_m(i) - 41.7142;
+    if mu_ptr > t
+        gps_t = i - 1;
+        break;
+    end
+    pose_errors(1, i) = abs(x(1, mu_ptr) - Lo_m(i) - 67.6493);
+    pose_errors(2, i) = abs(x(2, mu_ptr) - La_m(i) - 41.7142);
 end
 
 timesteps = 1:gps_t;
