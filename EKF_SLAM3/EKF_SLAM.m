@@ -195,8 +195,8 @@ for i = 1:gps_t
 end
 
 timesteps = 1:gps_t;
-mex = mean(pose_errors(1, gps_t));
-mey = mean(pose_errors(2, gps_t));
+mex = mean(pose_errors(1, 1:gps_t));
+mey = mean(pose_errors(2, 1:gps_t));
 
 figure('Name', 'Evolution State Estimation Errors');
 subplot(2,1,1);
