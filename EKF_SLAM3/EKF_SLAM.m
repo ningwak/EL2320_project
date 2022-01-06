@@ -179,26 +179,26 @@ end
 time = toc;
 
 % plot error
-gps_t = 180;
+gps_t = 4466;
 pose_errors = zeros(2, gps_t);
 mu_ptr = 1;
 for i = 1:gps_t
-    if (controlTime(mu_ptr) < timeGps(i))
+    while controlTime(mu_ptr) < timeGps(i)
         mu_ptr = mu_ptr + 1;
-        if (mu_ptr > t) 
-            gps_t = i - 1;
-            break;
-        end
     end
-    pose_errors(1, i) = x(1, mu_ptr) - Lo_m(i);
-    pose_errors(2, i) = x(2, mu_ptr) - La_m(i);
+    if mu_ptr > t
+        gps_t = i - 1;
+        break;
+    end
+    pose_errors(1, i) = abs(x(1, mu_ptr) - Lo_m(i));
+    pose_errors(2, i) = abs(x(2, mu_ptr) - La_m(i));
 end
 
 timesteps = 1:gps_t;
 mex = mean(pose_errors(1, 1:gps_t));
 mey = mean(pose_errors(2, 1:gps_t));
 
-figure('Name', 'Evolution State Estimation Errors');
+figure('name', 'Evolution State Estimation Errors');
 subplot(2,1,1);
 plot(timesteps, pose_errors(1,1:gps_t));
 ylabel('error\_x [m]');
