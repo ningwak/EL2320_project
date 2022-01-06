@@ -161,7 +161,7 @@ for i = 1: t - 1
     end
 %     mu_bar(1:3)
 %     x0(3, i + 1)
-    %mu_bar(3) = mod(mu_bar(3), 2 * pi);
+    mu_bar(3) = mod(mu_bar(3), 2 * pi);
     mu = mu_bar;
     x(:, i + 1) = mu(1:3);
     sigma = sigma_bar;
