@@ -22,7 +22,7 @@ noise.R = diag([0.05 0.05 0.001]); % (x, y, th)  [0.05 0.05 0.001]
 noise.Q = diag([5000 3000 800]);   % (range, angle, signature)     [1 0.01]
 
 % variables
-t = 200; % overall time, maximum 61945
+t = 2000; % overall time, maximum 61945
 
 alpha = 0.03;%0.03; % Minimum PI value
 u = zeros(2, t - 1); % control signal 2 * (t-1) [speed; steering angle]
