@@ -64,8 +64,8 @@ for j=1:size(z,2)
     omega(index_2,index_2) = omega(index_2,index_2) + H_2' /Q * H_2;
 
     %add to information vector xi
-    xi_1= H_1' / Q * (z(1:3,j) - z_hat + [H_1, H_2]*[x(:,t); m(:,jj)]); %here is a little different with hu
-    xi_2= H_2' / Q * (z(1:3,j) - z_hat + [H_1, H_2]*[x(:,t); m(:,jj)]); %here is a little different with hu
+    xi_1= H_1' / Q * (z(1:3,j) - z_hat + [H_1, H_2]*[x(:,t); m(:,jj)]); %a little different
+    xi_2= H_2' / Q * (z(1:3,j) - z_hat + [H_1, H_2]*[x(:,t); m(:,jj)]); %a little different
     xi(index_1) = xi(index_1) + xi_1;
     xi(index_2) = xi(index_2) + xi_2;
 end
